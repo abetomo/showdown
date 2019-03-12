@@ -1,4 +1,4 @@
-;/*! showdown v 2.0.0-alpha1 - 21-02-2019 */
+;/*! showdown v 2.0.0-alpha1 - 12-03-2019 */
 (function(){
 /**
  * Created by Tivie on 13-07-2015.
@@ -2293,7 +2293,7 @@ showdown.subParser('makehtml.abetomoA', function (text, options, globals) {
     var html = [
       '<div class="columns is-mobile">',
       '<div class="column is-2">',
-      '<figure class="image"><img class="is-rounded" src="IMG-URL-A"></figure>',
+      '<div class="left-image"></div>',
       '</div>',
       '<div class="left box column">',
       bq,
@@ -2350,7 +2350,7 @@ showdown.subParser('makehtml.abetomoB', function (text, options, globals) {
     var html = [
       '<div class="columns is-mobile">',
       '<div class="column is-2">',
-      '<figure class="image"><img class="is-rounded" src="IMG-URL-B""></figure>',
+      '<div class="right-image"></div>',
       '</div>',
       '<div class="right box column">',
       bq,
