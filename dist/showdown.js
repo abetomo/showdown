@@ -1,4 +1,4 @@
-;/*! showdown v 2.0.0-alpha1 - 24-10-2018 */
+;/*! showdown v 2.0.0-alpha1 - 21-02-2019 */
 (function(){
 /**
  * Created by Tivie on 13-07-2015.
@@ -2256,6 +2256,120 @@ showdown.helper.emojis = {
   'showdown': '<img width="20" height="20" align="absmiddle" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAS1BMVEX///8jJS0jJS0jJS0jJS0jJS0jJS0jJS0jJS0jJS0jJS0jJS0jJS0jJS0jJS0jJS0jJS3b1q3b1q3b1q3b1q3b1q3b1q3b1q3b1q0565CIAAAAGXRSTlMAQHCAYCCw/+DQwPCQUBAwoHCAEP+wwFBgS2fvBgAAAUZJREFUeAHs1cGy7BAUheFFsEDw/k97VTq3T6ge2EmdM+pvrP6Iwd74XV9Kb52xuMU4/uc1YNgZLFOeV8FGdhGrNk5SEgUyPxAEdj4LlMRDyhVAMVEa2M7TBSeVZAFPdqHgzSZJwPKgcLFLAooHDJo4EDCw4gAtBoJA5UFj4Ng5LOGLwVXZuoIlji/jeQHFk7+baHxrCjeUwB9+s88KndvlhcyBN5BSkYNQIVVb4pV+Npm7hhuKDs/uMP5KxT3WzSNNLIuuoDpMmuAVMruMSeDyQBi24DTr43LAY7ILA1QYaWkgfHzFthYYzg67SQsCbB8GhJUEGCtO9n0rSaCLxgJQjS/JSgMTg2eBDEHAJ+H350AsjYNYscrErgI2e/l+mdR967TCX/v6N0EhPECYCP0i+IAoYQOE8BogNhQMEMdrgAQWHaMAAGi5I5euoY9NAAAAAElFTkSuQmCC">'
 };
 
+showdown.subParser('makehtml.abetomoA', function (text, options, globals) {
+  'use strict';
+
+  text = globals.converter._dispatch('makehtml.abetomoA.before', text, options, globals).getText();
+
+  // add a couple extra lines after the text and endtext mark
+  text = text + '\n\n';
+
+  var rgx = /(^ {0,3}->[ \t]?.+\n(.+\n)*\n*)+/gm;
+  if (options.splitAdjacentBlockquotes) {
+    rgx = /^ {0,3}<-[\s\S]*?(?:\n\n)/gm;
+  }
+
+  text = text.replace(rgx, function (bq) {
+    bq = bq.replace(/^[ \t]*->[ \t]?/gm, ''); // trim one level of quoting
+
+    // attacklab: clean up hack
+    bq = bq.replace(/¨0/g, '');
+
+    bq = bq.replace(/^[ \t]+$/gm, ''); // trim whitespace-only lines
+    bq = showdown.subParser('makehtml.githubCodeBlocks')(bq, options, globals);
+    bq = showdown.subParser('makehtml.blockGamut')(bq, options, globals); // recurse
+
+    bq = bq.replace(/(^|\n)/g, '$1  ');
+    // These leading spaces screw with <pre> content, so we need to fix that:
+    bq = bq.replace(/(\s*<pre>[^\r]+?<\/pre>)/gm, function (wholeMatch, m1) {
+      var pre = m1;
+      // attacklab: hack around Konqueror 3.5.4 bug:
+      pre = pre.replace(/^  /mg, '¨0');
+      pre = pre.replace(/¨0/g, '');
+      return pre;
+    });
+
+    // Use Bulma
+    var html = [
+      '<div class="columns is-mobile">',
+      '<div class="column is-2">',
+      '<figure class="image"><img class="is-rounded" src="IMG-URL-A"></figure>',
+      '</div>',
+      '<div class="left box column">',
+      bq,
+      '</div>',
+      '</div>',
+    ].join('\n');
+
+    return showdown.subParser('makehtml.hashBlock')(
+      html,
+      options,
+      globals
+    );
+  });
+
+  text = globals.converter._dispatch('makehtml.abetomoA.after', text, options, globals).getText();
+
+  return text;
+});
+
+showdown.subParser('makehtml.abetomoB', function (text, options, globals) {
+  'use strict';
+
+  text = globals.converter._dispatch('makehtml.abetomoB.before', text, options, globals).getText();
+
+  // add a couple extra lines after the text and endtext mark
+  text = text + '\n\n';
+
+  var rgx = /(^ {0,3}<-[ \t]?.+\n(.+\n)*\n*)+/gm;
+  if (options.splitAdjacentBlockquotes) {
+    rgx = /^ {0,3}<-[\s\S]*?(?:\n\n)/gm;
+  }
+
+  text = text.replace(rgx, function (bq) {
+    bq = bq.replace(/^[ \t]*<-[ \t]?/gm, ''); // trim one level of quoting
+
+    // attacklab: clean up hack
+    bq = bq.replace(/¨0/g, '');
+
+    bq = bq.replace(/^[ \t]+$/gm, ''); // trim whitespace-only lines
+    bq = showdown.subParser('makehtml.githubCodeBlocks')(bq, options, globals);
+    bq = showdown.subParser('makehtml.blockGamut')(bq, options, globals); // recurse
+
+    bq = bq.replace(/(^|\n)/g, '$1  ');
+    // These leading spaces screw with <pre> content, so we need to fix that:
+    bq = bq.replace(/(\s*<pre>[^\r]+?<\/pre>)/gm, function (wholeMatch, m1) {
+      var pre = m1;
+      // attacklab: hack around Konqueror 3.5.4 bug:
+      pre = pre.replace(/^  /mg, '¨0');
+      pre = pre.replace(/¨0/g, '');
+      return pre;
+    });
+
+    // Use Bulma
+    var html = [
+      '<div class="columns is-mobile">',
+      '<div class="column is-2">',
+      '<figure class="image"><img class="is-rounded" src="IMG-URL-B""></figure>',
+      '</div>',
+      '<div class="right box column">',
+      bq,
+      '</div>',
+      '</div>',
+    ].join('\n');
+
+    return showdown.subParser('makehtml.hashBlock')(
+      html,
+      options,
+      globals
+    );
+  });
+
+  text = globals.converter._dispatch('makehtml.abetomoB.after', text, options, globals).getText();
+
+  return text;
+});
+
 /**
  * These are all the transformations that form block-level
  * tags like paragraphs, headers, and list items.
@@ -2268,6 +2382,12 @@ showdown.subParser('makehtml.blockGamut', function (text, options, globals) {
   // we parse blockquotes first so that we can have headings and hrs
   // inside blockquotes
   text = showdown.subParser('makehtml.blockQuotes')(text, options, globals);
+
+  ////
+  text = showdown.subParser('makehtml.abetomoA')(text, options, globals);
+  text = showdown.subParser('makehtml.abetomoB')(text, options, globals);
+  ////
+
   text = showdown.subParser('makehtml.headers')(text, options, globals);
 
   // Do Horizontal Rules:
@@ -2530,8 +2650,9 @@ showdown.subParser('makehtml.ellipsis', function (text, options, globals) {
 });
 
 /**
- * These are all the transformations that occur *within* block-level
- * tags like paragraphs, headers, and list items.
+ * Turn emoji codes into emojis
+ *
+ * List of supported emojis: https://github.com/showdownjs/showdown/wiki/Emojis
  */
 showdown.subParser('makehtml.emoji', function (text, options, globals) {
   'use strict';

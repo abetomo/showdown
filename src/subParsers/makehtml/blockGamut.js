@@ -10,6 +10,12 @@ showdown.subParser('makehtml.blockGamut', function (text, options, globals) {
   // we parse blockquotes first so that we can have headings and hrs
   // inside blockquotes
   text = showdown.subParser('makehtml.blockQuotes')(text, options, globals);
+
+  ////
+  text = showdown.subParser('makehtml.abetomoA')(text, options, globals);
+  text = showdown.subParser('makehtml.abetomoB')(text, options, globals);
+  ////
+
   text = showdown.subParser('makehtml.headers')(text, options, globals);
 
   // Do Horizontal Rules:
